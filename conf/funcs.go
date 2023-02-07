@@ -1,4 +1,4 @@
-package main
+package conf
 
 import (
 	"flag"
@@ -20,7 +20,7 @@ func init() {
 	_ = godotenv.Load()
 }
 
-func getRoot() string {
+func GetRoot() string {
 	if *root != "" {
 		return *root
 	}
@@ -37,7 +37,7 @@ func getRoot() string {
 	return pwd
 }
 
-func getPort() string {
+func GetPort() string {
 	if *port != "" {
 		return *port
 	}
@@ -49,7 +49,7 @@ func getPort() string {
 	return defaultPort
 }
 
-func getBackend() string {
+func GetBackend() string {
 	if *backend != "" {
 		return *backend
 	}

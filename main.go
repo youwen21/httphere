@@ -23,14 +23,16 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"personal/httphere/conf"
+	"personal/httphere/server"
 )
 
 func main() {
-	sRoot := getRoot()
-	sPort := getPort()
-	sBackend := getBackend()
+	sRoot := conf.GetRoot()
+	sPort := conf.GetPort()
+	sBackend := conf.GetBackend()
 
-	server := NewMyServer(sRoot, sBackend)
+	httpServer := server.NewMyServer(sRoot, sBackend)
 	addr := net.JoinHostPort("", sPort)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -43,7 +45,7 @@ func main() {
 	fmt.Printf("root is %s\n", sRoot)
 
 	fmt.Printf("Listening on %s\n", listener.Addr().String())
-	err = http.Serve(listener, server)
+	err = http.Serve(listener, httpServer)
 	if err != nil {
 		fmt.Printf("server http error:%v\n", err)
 	}
