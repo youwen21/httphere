@@ -28,9 +28,7 @@ import (
 )
 
 func main() {
-	root := conf.GetRoot()
 	port := conf.GetPort()
-	backend := conf.GetBackend()
 
 	fmt.Printf("port is %s\n", port)
 
@@ -42,10 +40,7 @@ func main() {
 	}
 	fmt.Printf("Listening on %s\n", listener.Addr().String())
 
-	fmt.Printf("backend URL is %s\n", backend)
-	fmt.Printf("root is %s\n", root)
-
-	httpServer := server.NewMyServer(root, backend)
+	httpServer := server.NewMyServer()
 	err = http.Serve(listener, httpServer)
 	if err != nil {
 		fmt.Printf("server http error:%v\n", err)

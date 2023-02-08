@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"os"
+	"strings"
 )
 
-type fastCGIConf struct {
+type FastCGIConf struct {
 	FastCGI        string
 	FastCGIProto   string
 	FastCGIAddress string
@@ -15,14 +16,16 @@ type fastCGIConf struct {
 }
 
 var (
+	defaultPort    = "8080"
+	defaultBackend = "http://127.0.0.1:80"
+
 	port    = flag.String("port", "", "Port to run the server. 0 for a random port.")
 	root    = flag.String("root", "", "specify the root.")
 	backend = flag.String("backend", "", "backend server URL.")
 
-	fastCGI fastCGIConf
+	fastCGI FastCGIConf
 
-	defaultPort    = "8080"
-	defaultBackend = "http://127.0.0.1:80"
+	rewrite map[string]string
 )
 
 // system vars
@@ -39,6 +42,11 @@ var (
 func init() {
 	_ = godotenv.Load()
 
+	initFast()
+	initRewrite()
+}
+
+func initFast() {
 	fastCGI.FastCGI = os.Getenv("FAST_CGI")
 
 	if *fcgi_proto == "" {
@@ -61,6 +69,25 @@ func init() {
 
 	if fastCGI.FastCGIRoot == "" {
 		fastCGI.FastCGIRoot, _ = os.Getwd()
+	}
+}
+
+func initRewrite() {
+	rewriteRules := os.Getenv("REWRITE")
+	if rewriteRules == "" {
+		return
+	}
+	rewrite = make(map[string]string)
+
+	rules := strings.Split(rewriteRules, ",")
+	for _, v := range rules {
+		if !strings.Contains(v, "=") {
+			fmt.Println("rewrite rule invalid: " + v)
+			continue
+		}
+
+		rule := strings.Split(v, "=")
+		rewrite[rule[0]] = rule[1]
 	}
 }
 
@@ -105,6 +132,10 @@ func GetBackend() string {
 	return defaultBackend
 }
 
-func GetFastCGIConfig() fastCGIConf {
+func GetFastCGIConfig() FastCGIConf {
 	return fastCGI
+}
+
+func GetRewrite() map[string]string {
+	return rewrite
 }

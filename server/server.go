@@ -12,7 +12,8 @@ import (
 )
 
 type MyServer struct {
-	root string
+	root    string
+	rewrite map[string]string
 
 	fileServer    http.Handler
 	reverseServer *httputil.ReverseProxy
@@ -35,6 +36,9 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 如果静态文件不存在
 	_, err := os.Stat(filepath.Join(f.root, upath))
 	if os.IsNotExist(err) {
+		if f.rewrite != nil {
+			r.URL.Path = f.RewritePath(r.URL.Path)
+		}
 		f.reverseServer.ServeHTTP(w, r)
 		return
 	}
@@ -44,13 +48,34 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	f.fileServer.ServeHTTP(w, r)
 }
 
-func NewMyServer(root string, proxyURL string) MyServer {
+func (f MyServer) RewritePath(path string) string {
+	if f.rewrite == nil {
+		return path
+	}
+
+	for k, v := range f.rewrite {
+		if strings.HasPrefix(path, k) {
+			return strings.Replace(path, k, v, 1)
+		}
+	}
+
+	return path
+}
+
+func NewMyServer() MyServer {
+	root := conf.GetRoot()
+	backend := conf.GetBackend()
+
+	fmt.Printf("root is %s\n", root)
+	fmt.Printf("backend URL is %s\n", backend)
+
 	var s MyServer
 	s.root = root
+	s.rewrite = conf.GetRewrite()
 
 	s.fileServer = http.FileServer(http.Dir(root))
 
-	backendURL, err := url.Parse(proxyURL)
+	backendURL, err := url.Parse(backend)
 	if err != nil {
 		fmt.Printf("backend server invalid: %v\n", err)
 	}
