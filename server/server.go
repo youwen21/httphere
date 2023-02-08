@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"personal/httphere/conf"
 	"strings"
 )
 
@@ -55,9 +56,10 @@ func NewMyServer(root string, proxyURL string) MyServer {
 	}
 	s.reverseServer = httputil.NewSingleHostReverseProxy(backendURL)
 
-	if os.Getenv("FAST_CGI") == "true" {
+	cfg := conf.GetFastCGIConfig()
+	if cfg.FastCGI == "true" {
 		s.FastCGIEnabled = true
-		s.fastCGIServer = NewFastCGIServer()
+		s.fastCGIServer = NewFastCGIServer(cfg.FastCGIProto, cfg.FastCGIAddress, cfg.FastCGIRoot)
 	}
 
 	return s

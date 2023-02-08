@@ -28,23 +28,24 @@ import (
 )
 
 func main() {
-	sRoot := conf.GetRoot()
-	sPort := conf.GetPort()
-	sBackend := conf.GetBackend()
+	root := conf.GetRoot()
+	port := conf.GetPort()
+	backend := conf.GetBackend()
 
-	httpServer := server.NewMyServer(sRoot, sBackend)
-	addr := net.JoinHostPort("", sPort)
+	fmt.Printf("port is %s\n", port)
+
+	addr := net.JoinHostPort("", port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Printf("Listen err: %v", err)
 		os.Exit(2)
 	}
-
-	fmt.Printf("port is %s\n", sPort)
-	fmt.Printf("backend URL is %s\n", sBackend)
-	fmt.Printf("root is %s\n", sRoot)
-
 	fmt.Printf("Listening on %s\n", listener.Addr().String())
+
+	fmt.Printf("backend URL is %s\n", backend)
+	fmt.Printf("root is %s\n", root)
+
+	httpServer := server.NewMyServer(root, backend)
 	err = http.Serve(listener, httpServer)
 	if err != nil {
 		fmt.Printf("server http error:%v\n", err)

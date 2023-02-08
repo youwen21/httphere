@@ -4,53 +4,26 @@ package server
 
 import (
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path/filepath"
 	"personal/httphere/fcgiclient"
 	"strconv"
 	"strings"
 )
 
-// system vars
-var (
-	FCGI_PROTO *string = flag.String("fastcgi_proto", "", "tcp or unix")
-	FCGI_ADDR  *string = flag.String("fastcgi_addr", "", "ip:port or unix file")
-)
-
-// user vars
-var (
-	FASTCGI_ROOT *string = flag.String("fastcgi_root", "", "the static files root directory, (default empty)")
-)
-
-func init() {
-	if *FCGI_PROTO == "" {
-		*FCGI_PROTO = os.Getenv("FAST_CGI_PROTO")
-	}
-	if *FCGI_ADDR == "" {
-		*FCGI_ADDR = os.Getenv("FAST_CGI_ADDR")
-	}
-	if *FASTCGI_ROOT == "" {
-		*FASTCGI_ROOT = os.Getenv("FAST_CGI_ROOT")
-	}
-
-	// set default
-	if *FASTCGI_ROOT == "" {
-		*FASTCGI_ROOT, _ = os.Getwd()
-	}
-}
-
 type FastCGIServer struct {
+	FastCGIProto   string
+	FastCGIAddress string
+	FastCGIRoot    string
 }
 
 func (f FastCGIServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
-	fcgi, err := fcgiclient.Dial(*FCGI_PROTO, *FCGI_ADDR)
+	fcgi, err := fcgiclient.Dial(f.FastCGIProto, f.FastCGIAddress)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(res, "Unable to connect to the backend", 502)
@@ -99,19 +72,19 @@ func (f FastCGIServer) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		"SERVER_PROTOCOL": req.Proto,
 		"SERVER_SOFTWARE": "",
 
-		"DOCUMENT_ROOT":   *FASTCGI_ROOT,
+		"DOCUMENT_ROOT":   f.FastCGIRoot,
 		"DOCUMENT_URI":    req.URL.Path,
 		"HTTP_HOST":       req.Host, // added here, since not always part of headers
 		"REQUEST_URI":     req.URL.RequestURI(),
-		"SCRIPT_FILENAME": filepath.Join(*FASTCGI_ROOT, req.URL.Path),
+		"SCRIPT_FILENAME": filepath.Join(f.FastCGIRoot, req.URL.Path),
 		"SCRIPT_NAME":     req.URL.Path,
 
 		// 以下这几个 好像没什么用？
 		"REQUEST_PATH":  req.URL.Path,
 		"SERVER_ADDR":   reqHost,
 		"SERVER_PORT":   reqPort,
-		"FCGI_PROTOCOL": *FCGI_PROTO,
-		"FCGI_ADDR":     *FCGI_ADDR,
+		"FCGI_PROTOCOL": f.FastCGIProto,
+		"fcgi_addr":     f.FastCGIAddress,
 	}
 
 	if reqPort != "" {
@@ -210,7 +183,10 @@ var tlsProtocolStrings = map[uint16]string{
 	tls.VersionTLS13: "TLSv1.3",
 }
 
-func NewFastCGIServer() FastCGIServer {
+func NewFastCGIServer(FastCGIProto string, FastCGIAddress string, FastCGIRoot string) FastCGIServer {
 	var s FastCGIServer
+	s.FastCGIProto = FastCGIProto
+	s.FastCGIAddress = FastCGIAddress
+	s.FastCGIRoot = FastCGIRoot
 	return s
 }
