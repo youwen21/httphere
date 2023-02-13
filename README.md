@@ -14,7 +14,7 @@ go install github.com/youwen21/httphere
 
 
 # configure
-edit .env file 
+touch .env file 
 
 ```env
 cd {pwd}

@@ -19,6 +19,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -28,6 +29,8 @@ import (
 )
 
 func main() {
+	flag.Parse()
+
 	port := conf.GetPort()
 
 	fmt.Printf("port is %s\n", port)

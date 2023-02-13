@@ -16,7 +16,7 @@ type FastCGIConf struct {
 }
 
 var (
-	defaultPort    = "8080"
+	defaultPort    = "8090"
 	defaultBackend = "http://127.0.0.1:80"
 
 	port    = flag.String("port", "", "Port to run the server. 0 for a random port.")
