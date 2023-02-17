@@ -69,3 +69,19 @@ BACKEND="http://127.0.0.1:8099/"
  - fastcgi_root :  php 项目的目录位置
 
 
+# 本地开发使用httphere有哪些好处
+
+### 不用修改nginx配置
+有些情况，预览一个网站要增加nginx配置。 使用httphere避免增加配置的麻烦， 小白用户使用更方便。
+
+### 配置代理更方便
+只需要支持backend，后端http://ip:port， 不存在请求便转发给后端。
+
+### php开发者不用配置nginx
+支持FastCGI协议， httphere可以直接通过fastCGI与php-fpm交互。
+
+### 调试更方便，
+前端把便宜好的disc发给后端，不用配置proxy，不用考跨域问题。
+
+### 共享方件更方便
+在要共享的文件夹启动httphere,  局域网用户可以通过http服务下载对应的文件。
