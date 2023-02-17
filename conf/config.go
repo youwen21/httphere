@@ -47,22 +47,22 @@ func init() {
 }
 
 func initFast() {
-	fastCGI.FastCGI = os.Getenv("FAST_CGI")
+	fastCGI.FastCGI = os.Getenv("FASTCGI")
 
 	if *fcgi_proto == "" {
-		fastCGI.FastCGIProto = os.Getenv("FAST_CGI_PROTO")
+		fastCGI.FastCGIProto = os.Getenv("FASTCGI_PROTO")
 	} else {
 		fastCGI.FastCGIProto = *fcgi_proto
 	}
 
 	if *fcgi_addr == "" {
-		fastCGI.FastCGIAddress = os.Getenv("FAST_CGI_ADDR")
+		fastCGI.FastCGIAddress = os.Getenv("FASTCGI_ADDR")
 	} else {
 		fastCGI.FastCGIAddress = *fcgi_addr
 	}
 
 	if *fcgi_root == "" {
-		fastCGI.FastCGIRoot = os.Getenv("FAST_CGI_ROOT")
+		fastCGI.FastCGIRoot = os.Getenv("FASTCGI_ROOT")
 	} else {
 		fastCGI.FastCGIRoot = *fcgi_root
 	}
