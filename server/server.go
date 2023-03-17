@@ -39,7 +39,12 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if f.rewrite != nil {
 			r.URL.Path = f.RewritePath(r.URL.Path)
 		}
-		f.reverseServer.ServeHTTP(w, r)
+		if f.reverseServer != nil {
+			f.reverseServer.ServeHTTP(w, r)
+		} else {
+			b, _ := httputil.DumpRequest(r, true)
+			w.Write(b)
+		}
 		return
 	}
 
@@ -75,11 +80,14 @@ func NewMyServer() MyServer {
 
 	s.fileServer = http.FileServer(http.Dir(root))
 
-	backendURL, err := url.Parse(backend)
-	if err != nil {
-		fmt.Printf("backend server invalid: %v\n", err)
+	if backend != "" {
+		backendURL, err := url.Parse(backend)
+		if err != nil {
+			fmt.Printf("backend server invalid: %v\n", err)
+		} else {
+			s.reverseServer = httputil.NewSingleHostReverseProxy(backendURL)
+		}
 	}
-	s.reverseServer = httputil.NewSingleHostReverseProxy(backendURL)
 
 	cfg := conf.GetFastCGIConfig()
 	if cfg.FastCGI == "true" {

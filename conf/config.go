@@ -129,7 +129,7 @@ func GetBackend() string {
 		return eBackend
 	}
 
-	return defaultBackend
+	return ""
 }
 
 func GetFastCGIConfig() FastCGIConf {
