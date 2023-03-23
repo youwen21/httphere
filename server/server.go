@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"personal/httphere/conf"
 	"strings"
+	"time"
 )
 
 type MyServer struct {
@@ -44,6 +45,9 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			b, _ := httputil.DumpRequest(r, true)
 			w.Write(b)
+			fmt.Println(time.Now().Format(time.RFC3339))
+			fmt.Println(string(b))
+			fmt.Println()
 		}
 		return
 	}
