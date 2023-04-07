@@ -5,13 +5,13 @@ package server
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/httphere/fcgiclient"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
-	"personal/httphere/fcgiclient"
 	"strconv"
 	"strings"
 )

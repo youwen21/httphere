@@ -2,12 +2,12 @@ package server
 
 import (
 	"fmt"
+	"github.com/httphere/conf"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
-	"personal/httphere/conf"
 	"strings"
 	"time"
 )

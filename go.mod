@@ -1,4 +1,4 @@
-module personal/httphere
+module github.com/httphere
 
 go 1.19
 

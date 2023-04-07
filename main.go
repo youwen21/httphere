@@ -21,11 +21,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/httphere/conf"
+	"github.com/httphere/server"
 	"net"
 	"net/http"
 	"os"
-	"personal/httphere/conf"
-	"personal/httphere/server"
 )
 
 func main() {
