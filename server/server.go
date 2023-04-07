@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/httphere/conf"
+	"github.com/youwen21/httphere/conf"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
