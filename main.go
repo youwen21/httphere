@@ -21,8 +21,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/youwen21/httphere/conf"
-	"github.com/youwen21/httphere/server"
+	"httphere/conf"
+	"httphere/server"
 	"net"
 	"net/http"
 	"os"
