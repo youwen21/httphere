@@ -1,11 +1,13 @@
 package conf
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv"
+	"github.com/spf13/viper"
 	"os"
-	"strings"
 )
 
 type FastCGIConf struct {
@@ -16,79 +18,55 @@ type FastCGIConf struct {
 }
 
 var (
-	defaultPort    = "80"
-	defaultBackend = "http://127.0.0.1:80"
+	defaultPort = "80"
+	port        = flag.String("port", "", "Port to run the server.")
 
-	port    = flag.String("port", "", "Port to run the server. 0 for a random port.")
 	root    = flag.String("root", "", "specify the root.")
-	backend = flag.String("backend", "", "backend server URL.")
+	backend = flag.String("backend", "", "default backend server URL.")
 
-	fastCGI FastCGIConf
-
-	rewrite map[string]string
-)
-
-// system vars
-var (
-	fcgi_proto *string = flag.String("fastcgi_proto", "", "tcp or unix")
-	fcgi_addr  *string = flag.String("fastcgi_addr", "", "ip:port or unix file")
-)
-
-// user vars
-var (
-	fcgi_root *string = flag.String("fastcgi_root", "", "the static files root directory, (default empty)")
+	config map[string]interface{}
 )
 
 func init() {
-	_ = godotenv.Load()
-
-	initFast()
-	initRewrite()
+	initConf()
+	//initRewrite()
 }
 
-func initFast() {
-	fastCGI.FastCGI = os.Getenv("FASTCGI")
+//func initRewrite() {
+//	rewriteRules := os.Getenv("REWRITE")
+//	if rewriteRules == "" {
+//		return
+//	}
+//	rewrite = make(map[string]string)
+//
+//	rules := strings.Split(rewriteRules, ",")
+//	for _, v := range rules {
+//		if !strings.Contains(v, "=") {
+//			fmt.Println("rewrite rule invalid: " + v)
+//			continue
+//		}
+//
+//		rule := strings.Split(v, "=")
+//		rewrite[rule[0]] = rule[1]
+//	}
+//}
 
-	if *fcgi_proto == "" {
-		fastCGI.FastCGIProto = os.Getenv("FASTCGI_PROTO")
+func initConf() {
+	config = make(map[string]interface{})
+
+	viper.SetConfigName("config") // name of config file (without extension)
+	viper.AddConfigPath(".")      // optionally look for config in the working directory
+	err := viper.ReadInConfig()   // Find and read the config file
+	if err != nil {               // Handle errors reading the config file
+		fmt.Println("read config from embed data")
+		viper.SetConfigType("toml")
+		viper.ReadConfig(bytes.NewReader(embedConfig))
 	} else {
-		fastCGI.FastCGIProto = *fcgi_proto
+		fmt.Println("viper get config file:", viper.ConfigFileUsed())
 	}
-
-	if *fcgi_addr == "" {
-		fastCGI.FastCGIAddress = os.Getenv("FASTCGI_ADDR")
-	} else {
-		fastCGI.FastCGIAddress = *fcgi_addr
-	}
-
-	if *fcgi_root == "" {
-		fastCGI.FastCGIRoot = os.Getenv("FASTCGI_ROOT")
-	} else {
-		fastCGI.FastCGIRoot = *fcgi_root
-	}
-
-	if fastCGI.FastCGIRoot == "" {
-		fastCGI.FastCGIRoot, _ = os.Getwd()
-	}
-}
-
-func initRewrite() {
-	rewriteRules := os.Getenv("REWRITE")
-	if rewriteRules == "" {
-		return
-	}
-	rewrite = make(map[string]string)
-
-	rules := strings.Split(rewriteRules, ",")
-	for _, v := range rules {
-		if !strings.Contains(v, "=") {
-			fmt.Println("rewrite rule invalid: " + v)
-			continue
-		}
-
-		rule := strings.Split(v, "=")
-		rewrite[rule[0]] = rule[1]
-	}
+	config = viper.AllSettings()
+	b, _ := json.MarshalIndent(config, "", "  ")
+	fmt.Print(string(b))
 }
 
 func GetRoot() string {
@@ -125,17 +103,17 @@ func GetBackend() string {
 		return *backend
 	}
 
-	if eBackend := os.Getenv("BACKEND"); eBackend != "" {
+	if eBackend := os.Getenv("HERE_BACKEND"); eBackend != "" {
 		return eBackend
 	}
 
 	return ""
 }
 
-func GetFastCGIConfig() FastCGIConf {
-	return fastCGI
+func GetConfig() map[string]interface{} {
+	return config
 }
 
-func GetRewrite() map[string]string {
-	return rewrite
-}
+//func GetRewrite() map[string]string {
+//	return rewrite
+//}

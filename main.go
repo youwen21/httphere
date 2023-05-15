@@ -16,6 +16,8 @@
 // Author: youwen (youwen21@yeah.net)
 //
 
+// https://www.integralist.co.uk/posts/golang-reverse-proxy/
+
 package main
 
 import (
@@ -32,7 +34,6 @@ func main() {
 	flag.Parse()
 
 	port := conf.GetPort()
-
 	fmt.Printf("port is %s\n", port)
 
 	addr := net.JoinHostPort("", port)

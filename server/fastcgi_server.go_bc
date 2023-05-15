@@ -1,5 +1,7 @@
 package server
 
+// TODO:  use net/http/fcgi
+
 // copy from https://github.com/alash3al/xerver/blob/master/xerver.go
 
 import (
