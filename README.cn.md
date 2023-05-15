@@ -52,7 +52,7 @@ touch .env file
 cd {pwd}
 touch .env
 
-PORT=3100
+PORT=80
 BACKEND="http://127.0.0.1:8099/"
 ```
 

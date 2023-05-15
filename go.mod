@@ -1,4 +1,4 @@
-module github.com/youwen21/httphere
+module httphere
 
 go 1.19
 

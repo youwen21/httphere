@@ -16,7 +16,7 @@ type FastCGIConf struct {
 }
 
 var (
-	defaultPort    = "8090"
+	defaultPort    = "80"
 	defaultBackend = "http://127.0.0.1:80"
 
 	port    = flag.String("port", "", "Port to run the server. 0 for a random port.")
@@ -113,7 +113,7 @@ func GetPort() string {
 		return *port
 	}
 
-	if ePort := os.Getenv("PORT"); ePort != "" {
+	if ePort := os.Getenv("HERE_PORT"); ePort != "" {
 		return ePort
 	}
 

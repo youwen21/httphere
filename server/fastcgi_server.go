@@ -5,7 +5,7 @@ package server
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/youwen21/httphere/fcgiclient"
+	"httphere/fcgiclient"
 	"io"
 	"net"
 	"net/http"
