@@ -8,6 +8,7 @@ import (
 	_ "github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"os"
+	"strings"
 )
 
 type FastCGIConf struct {
@@ -65,6 +66,15 @@ func initConf() {
 		fmt.Println("viper get config file:", viper.ConfigFileUsed())
 	}
 	config = viper.AllSettings()
+
+	for k, v := range config {
+		if strings.Contains(k, "__") {
+			newK := strings.Replace(k, "__", ".", -1)
+			config[newK] = v
+			delete(config, k)
+		}
+	}
+
 	b, _ := json.MarshalIndent(config, "", "  ")
 	fmt.Print(string(b))
 }
