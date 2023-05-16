@@ -16,31 +16,29 @@ import (
 type MyServer struct {
 	root string
 
-	fileServer    http.Handler
-	reverseServer *httputil.ReverseProxy
+	fileServer       http.Handler
+	defaultRevServer *http.ServeMux
 
-	fastCGIServer http.Handler
+	domainRevServers map[string]*http.ServeMux
 }
 
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	config := conf.GetConfig()
-	if v, has := config[r.Host]; has {
-		f.ServeHTTPHost(w, r, v)
+	// domain servers
+	if v, has := f.domainRevServers[r.Host]; has {
+		v.ServeHTTP(w, r)
 		return
 	}
 
-	upath := r.URL.Path
-
-	_, err := os.Stat(filepath.Join(f.root, upath))
+	_, err := os.Stat(filepath.Join(f.root, r.URL.Path))
 	// 输出静态文件
-	if !os.IsNotExist(err) {
+	if err == nil {
 		f.fileServer.ServeHTTP(w, r)
 		return
 	}
 
 	// 转发到默认代理服务器
-	if f.reverseServer != nil {
-		f.reverseServer.ServeHTTP(w, r)
+	if f.defaultRevServer != nil {
+		f.defaultRevServer.ServeHTTP(w, r)
 		return
 	}
 
@@ -50,30 +48,31 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(b))
 	fmt.Println()
 	w.Write(b)
+	return
 }
 
-func (f MyServer) ServeHTTPHost(w http.ResponseWriter, r *http.Request, hostConf interface{}) {
-	upath := r.URL.Path
-
-	rewriteRule := getRewriteRule(hostConf)
-	if rewriteRule != nil {
-		upath = RewritePath(upath, rewriteRule)
-	}
-
-	pathsCfg := getPaths(hostConf)
-	backend, has := pathsCfg[upath]
-	if !has {
-		backend = pathsCfg["backend"]
-	}
-	backendURL, err := url.Parse(backend)
-	if err != nil {
-		w.Write([]byte("backend config error"))
-		return
-	}
-
-	proxy := httputil.NewSingleHostReverseProxy(backendURL)
-	proxy.ServeHTTP(w, r)
-}
+//func (f MyServer) ServeHTTPHost(w http.ResponseWriter, r *http.Request, hostConf interface{}) {
+//	upath := r.URL.Path
+//
+//	rewriteRule := getRewriteRule(hostConf)
+//	if rewriteRule != nil {
+//		upath = RewritePath(upath, rewriteRule)
+//	}
+//
+//	pathsCfg := getPaths(hostConf)
+//	backend, has := pathsCfg[upath]
+//	if !has {
+//		backend = pathsCfg["/"]
+//	}
+//	backendURL, err := url.Parse(backend)
+//	if err != nil {
+//		w.Write([]byte("backend config error"))
+//		return
+//	}
+//
+//	proxy := httputil.NewSingleHostReverseProxy(backendURL)
+//	proxy.ServeHTTP(w, r)
+//}
 
 func getRewriteRule(cfg interface{}) map[string]string {
 	confMap, ok := cfg.(map[string]interface{})
@@ -139,29 +138,44 @@ func RewritePath(path string, rewriteRule map[string]string) string {
 //	return path
 //}
 
+func initMuxServerByConf(hostConf interface{}) *http.ServeMux {
+	pathsCfg := getPaths(hostConf)
+	if pathsCfg == nil {
+		return nil
+	}
+	server := http.NewServeMux()
+	for k, v := range pathsCfg {
+		backendURL, err := url.Parse(v)
+		if err != nil {
+			fmt.Println("config has error:", hostConf)
+			continue
+		}
+		server.Handle(k, httputil.NewSingleHostReverseProxy(backendURL))
+	}
+
+	return server
+}
+
 func NewMyServer() MyServer {
 	var s MyServer
-
+	s.domainRevServers = make(map[string]*http.ServeMux)
 	// static server
 	root := conf.GetRoot()
 	fmt.Printf("root is %s\n", root)
 	s.root = root
 	s.fileServer = http.FileServer(http.Dir(root))
 
-	// default reverse proxy server
-	backend := conf.GetBackend()
-	fmt.Printf("backend URL is %s\n", backend)
-	if backend != "" {
-		backendURL, err := url.Parse(backend)
-		if err != nil {
-			fmt.Printf("backend server invalid: %v\n", err)
-		} else {
-			s.reverseServer = httputil.NewSingleHostReverseProxy(backendURL)
+	cfg := conf.GetConfig()
+	for k, v := range cfg {
+		if k == "base" {
+			continue
 		}
+		if k == "default_server" {
+			s.defaultRevServer = initMuxServerByConf(v)
+			continue
+		}
+		s.domainRevServers[k] = initMuxServerByConf(v)
 	}
-
-	//http.HandleFunc()
-	// mux server， support config.toml
 
 	return s
 }

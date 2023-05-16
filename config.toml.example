@@ -1,0 +1,23 @@
+[base]
+static_server = "open"
+static_root = "./"
+port = "80"
+
+# 需要学习一下nginx， 转发时包含不包含路由前缀
+# 优化，每一个服务器都起一个mux.Server ,每一个路由都是一个reverseProxy Handler
+# 默认代理服务
+#[default_server]
+#"/" = ""
+
+# 指定域名
+[api__com]
+"/" = "http://127.0.0.1:8099/"
+
+# 指定域名 且 指定路由和重写规则
+[sql__com]
+"/aa" = "http://127.0.0.1:8099/"
+"/bb" = "http://119.91.223.53:8000"
+"/download" = "http://119.91.223.53:8000"
+"/" = "http://119.91.223.53:8098/"
+[sql__com.rewrite]
+"/aaa" = "/bbb"
