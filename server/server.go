@@ -17,9 +17,9 @@ type MyServer struct {
 	root string
 
 	fileServer       http.Handler
-	defaultRevServer *http.ServeMux
+	defaultRevServer http.Handler
 
-	domainRevServers map[string]*http.ServeMux
+	domainRevServers map[string]http.Handler
 }
 
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -158,7 +158,7 @@ func initMuxServerByConf(hostConf interface{}) *http.ServeMux {
 
 func NewMyServer() MyServer {
 	var s MyServer
-	s.domainRevServers = make(map[string]*http.ServeMux)
+	s.domainRevServers = make(map[string]http.Handler)
 	// static server
 	root := conf.GetRoot()
 	fmt.Printf("root is %s\n", root)
@@ -175,6 +175,14 @@ func NewMyServer() MyServer {
 			continue
 		}
 		s.domainRevServers[k] = initMuxServerByConf(v)
+	}
+
+	if s.defaultRevServer == nil {
+		backend := conf.GetBackend()
+		if backend != "" {
+			backendUrl, _ := url.Parse(backend)
+			s.defaultRevServer = httputil.NewSingleHostReverseProxy(backendUrl)
+		}
 	}
 
 	return s
