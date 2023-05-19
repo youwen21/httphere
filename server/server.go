@@ -51,29 +51,6 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//func (f MyServer) ServeHTTPHost(w http.ResponseWriter, r *http.Request, hostConf interface{}) {
-//	upath := r.URL.Path
-//
-//	rewriteRule := getRewriteRule(hostConf)
-//	if rewriteRule != nil {
-//		upath = RewritePath(upath, rewriteRule)
-//	}
-//
-//	pathsCfg := getPaths(hostConf)
-//	backend, has := pathsCfg[upath]
-//	if !has {
-//		backend = pathsCfg["/"]
-//	}
-//	backendURL, err := url.Parse(backend)
-//	if err != nil {
-//		w.Write([]byte("backend config error"))
-//		return
-//	}
-//
-//	proxy := httputil.NewSingleHostReverseProxy(backendURL)
-//	proxy.ServeHTTP(w, r)
-//}
-
 func getRewriteRule(cfg interface{}) map[string]string {
 	confMap, ok := cfg.(map[string]interface{})
 	if !ok {

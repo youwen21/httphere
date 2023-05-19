@@ -1,0 +1,27 @@
+base:
+  static_server: "open"
+  static_root: "./"
+  port: "80"
+
+
+# 指定域名
+api.com:
+  "/" = "http://127.0.0.1:8099/"
+
+# 指定域名 且 指定路由和重写规则
+sql.com:
+  "/aa": "http://127.0.0.1:8099/"
+  "/bb": "http://119.91.223.53:8000"
+  "/download": "http://119.91.223.53:8000"
+  "/" : "http://119.91.223.53:8098/"
+
+  "rewrite":
+      "/aaa": "/bbb"
+
+
+
+"wolf__test__yueyou__com":
+  "/": "http://127.0.0.1:18100/"
+
+'haha.heihei':
+  "/": "http://127.0.0.1:8099/"
