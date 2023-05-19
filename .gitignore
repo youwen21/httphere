@@ -1,4 +1,4 @@
 .idea/
 bin/
-config.toml
-config.yaml
+httphere.toml
+httphere.yaml

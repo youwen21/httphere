@@ -55,10 +55,10 @@ func init() {
 func initConf() {
 	config = make(map[string]interface{})
 
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.AddConfigPath(".")      // optionally look for config in the working directory
-	err := viper.ReadInConfig()   // Find and read the config file
-	if err != nil {               // Handle errors reading the config file
+	viper.SetConfigName("httphere") // name of config file (without extension)
+	viper.AddConfigPath(".")        // optionally look for config in the working directory
+	err := viper.ReadInConfig()     // Find and read the config file
+	if err != nil {                 // Handle errors reading the config file
 		fmt.Println("read config from embed data")
 		viper.SetConfigType("toml")
 		viper.ReadConfig(bytes.NewReader(embedConfig))
