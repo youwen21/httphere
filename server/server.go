@@ -40,12 +40,14 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 没有代理服务器，打应请求内容到 日志和请求方
-	b, _ := httputil.DumpRequest(r, true)
-	fmt.Println(time.Now().Format(time.RFC3339))
-	fmt.Println(string(b))
-	fmt.Println()
-	w.Write(b)
+	if conf.Here.Base.DumpRequest == "yes" {
+		// 没有代理服务器，打应请求内容到 日志和请求方
+		b, _ := httputil.DumpRequest(r, true)
+		fmt.Println(time.Now().Format(time.RFC3339))
+		fmt.Println(string(b))
+		fmt.Println()
+		w.Write(b)
+	}
 	return
 }
 

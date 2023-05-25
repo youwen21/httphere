@@ -21,27 +21,7 @@ var (
 
 func init() {
 	initConf()
-	//initRewrite()
 }
-
-//func initRewrite() {
-//	rewriteRules := os.Getenv("REWRITE")
-//	if rewriteRules == "" {
-//		return
-//	}
-//	rewrite = make(map[string]string)
-//
-//	rules := strings.Split(rewriteRules, ",")
-//	for _, v := range rules {
-//		if !strings.Contains(v, "=") {
-//			fmt.Println("rewrite rule invalid: " + v)
-//			continue
-//		}
-//
-//		rule := strings.Split(v, "=")
-//		rewrite[rule[0]] = rule[1]
-//	}
-//}
 
 func initConf() {
 	viper.SetConfigName("httphere") // name of config file (without extension)
