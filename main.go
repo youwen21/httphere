@@ -33,10 +33,7 @@ import (
 func main() {
 	flag.Parse()
 
-	port := conf.GetPort()
-	fmt.Printf("port is %s\n", port)
-
-	addr := net.JoinHostPort(conf.GetHost(), port)
+	addr := net.JoinHostPort(conf.GetHost(), conf.GetPort())
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Printf("Listen err: %v", err)
