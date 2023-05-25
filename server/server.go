@@ -2,14 +2,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
 	"httphere/conf"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -17,8 +15,6 @@ type MyServer struct {
 	root string
 
 	fileServer       http.Handler
-	defaultRevServer http.Handler
-
 	domainRevServers map[string]http.Handler
 }
 
@@ -29,16 +25,18 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := os.Stat(filepath.Join(f.root, r.URL.Path))
-	// 输出静态文件
-	if err == nil {
-		f.fileServer.ServeHTTP(w, r)
-		return
+	if f.fileServer != nil {
+		_, err := os.Stat(filepath.Join(f.root, r.URL.Path))
+		// 输出静态文件
+		if err == nil {
+			f.fileServer.ServeHTTP(w, r)
+			return
+		}
 	}
 
 	// 转发到默认代理服务器
-	if f.defaultRevServer != nil {
-		f.defaultRevServer.ServeHTTP(w, r)
+	if v, has := f.domainRevServers["default"]; has {
+		v.ServeHTTP(w, r)
 		return
 	}
 
@@ -51,83 +49,20 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func getRewriteRule(cfg interface{}) map[string]string {
-	confMap, ok := cfg.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	ruleI, ok := confMap["rewrite"]
-	if !ok {
-		return nil
-	}
-	rule, ok := ruleI.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-
-	result := make(map[string]string)
-	for k, v := range rule {
-		result[k] = cast.ToString(v)
-	}
-	return result
-}
-
-func getPaths(cfg interface{}) map[string]string {
-	confMap, ok := cfg.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-
-	result := make(map[string]string)
-	for k, v := range confMap {
-		if k == "rewrite" {
-			continue
-		}
-		if vStr, vok := v.(string); vok {
-			result[k] = vStr
-		}
-	}
-
-	return result
-}
-
-func RewritePath(path string, rewriteRule map[string]string) string {
-	for k, v := range rewriteRule {
-		if strings.HasPrefix(path, k) {
-			return strings.Replace(path, k, v, 1)
-		}
-	}
-
-	return path
-}
-
-//func (f MyServer) RewritePath(path string) string {
-//	if f.rewrite == nil {
-//		return path
-//	}
-//
-//	for k, v := range f.rewrite {
-//		if strings.HasPrefix(path, k) {
-//			return strings.Replace(path, k, v, 1)
-//		}
-//	}
-//
-//	return path
-//}
-
-func initMuxServerByConf(hostConf interface{}) *http.ServeMux {
-	pathsCfg := getPaths(hostConf)
-	if pathsCfg == nil {
-		return nil
-	}
+func initMuxServerByConf(hostConf conf.HostConf) *http.ServeMux {
 	server := http.NewServeMux()
-	for k, v := range pathsCfg {
+	for k, v := range hostConf.Paths {
 		backendURL, err := url.Parse(v)
 		if err != nil {
 			fmt.Println("config has error:", hostConf)
 			continue
 		}
-		server.Handle(k, httputil.NewSingleHostReverseProxy(backendURL))
+
+		if hostConf.ReverseType == "fake_host" {
+			server.Handle(k, NewSingleHostReverseProxyFake(backendURL))
+		} else {
+			server.Handle(k, httputil.NewSingleHostReverseProxy(backendURL))
+		}
 	}
 
 	return server
@@ -136,29 +71,27 @@ func initMuxServerByConf(hostConf interface{}) *http.ServeMux {
 func NewMyServer() MyServer {
 	var s MyServer
 	s.domainRevServers = make(map[string]http.Handler)
-	// static server
-	root := conf.GetRoot()
-	fmt.Printf("root is %s\n", root)
-	s.root = root
-	s.fileServer = http.FileServer(http.Dir(root))
 
-	cfg := conf.GetConfig()
-	for k, v := range cfg {
-		if k == "base" {
-			continue
-		}
-		if k == "default_server" {
-			s.defaultRevServer = initMuxServerByConf(v)
-			continue
-		}
-		s.domainRevServers[k] = initMuxServerByConf(v)
+	// static server
+	if conf.Here.Base.StaticServer == "open" {
+		root := conf.GetRoot()
+		fmt.Printf("root is %s\n", root)
+		s.root = root
+		s.fileServer = http.FileServer(http.Dir(root))
 	}
 
-	if s.defaultRevServer == nil {
-		backend := conf.GetBackend()
-		if backend != "" {
-			backendUrl, _ := url.Parse(backend)
-			s.defaultRevServer = httputil.NewSingleHostReverseProxy(backendUrl)
+	for _, v := range conf.Here.Hosts {
+		s.domainRevServers[v.Host] = initMuxServerByConf(v)
+	}
+
+	// overwrite default reverse server if command backend flag params represent
+	backend := conf.GetBackend()
+	if backend != "" {
+		backendURL, err := url.Parse(backend)
+		if err == nil {
+			s.domainRevServers["default"] = httputil.NewSingleHostReverseProxy(backendURL)
+		} else {
+			fmt.Println("backend parse error:", backend, err)
 		}
 	}
 

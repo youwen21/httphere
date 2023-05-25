@@ -1,17 +1,20 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 )
 
-// TODO 域名访问 修改成 ip:port
-
 func NewSingleHostReverseProxyFake(target *url.URL) *httputil.ReverseProxy {
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
+		// 便面域名检查阻止访问
+		req.Host = target.Host
+		//req.Header.Set("Referer", target.String()) //TODO
+
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		req.URL.Path, req.URL.RawPath = joinURLPath(target, req.URL)
@@ -24,6 +27,9 @@ func NewSingleHostReverseProxyFake(target *url.URL) *httputil.ReverseProxy {
 			// explicitly disable User-Agent so it's not set to default value
 			req.Header.Set("User-Agent", "")
 		}
+
+		bs, _ := httputil.DumpRequest(req, true)
+		fmt.Println(string(bs))
 	}
 	return &httputil.ReverseProxy{Director: director}
 }

@@ -4,5 +4,5 @@ import (
 	_ "embed"
 )
 
-//go:embed httphere.toml
+//go:embed httphere.yaml
 var embedConfig []byte

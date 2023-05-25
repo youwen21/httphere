@@ -1,0 +1,34 @@
+base:
+  #  listen_host: "0.0.0.0"  # default=0.0.0.0
+  listen_port: "80"  # default=80
+  static_server: "open"  # open | close,  default=open
+  static_root: "./" # default=./
+  dump_request: "yes"
+
+hosts:
+  - host: "default"
+    reverse_type: "default"
+    paths:
+      - "/": "http://127.0.0.1:8099/"
+      - "/aa": "http://127.0.0.1:8099/"
+    "rewrite":
+      - "/aaa": "/bbb"
+  # 指定域名
+  - host: "api.com"
+    reverse_type: "fake_host"
+    paths:
+      - "/": "http://127.0.0.1:8099/"
+      - "/aa": "http://127.0.0.1:8099/"
+    "rewrite":
+      - "/aaa": "/bbb"
+
+  # 指定域名 且 指定路由和重写规则
+  - host: "sql.com"
+    reverse_type: "fake_host"
+    paths:
+      "/aa": "http://127.0.0.1:8099/"
+      "/bb": "http://119.91.223.53:8000"
+      "/download": "http://119.91.223.53:8000"
+      "/": "http://119.91.223.53:8098/"
+    "rewrite":
+      "/aaa": "/bbb"

@@ -1,16 +1,5 @@
 package conf
 
-import (
-	"bytes"
-	"encoding/json"
-	"flag"
-	"fmt"
-	_ "github.com/joho/godotenv"
-	"github.com/spf13/viper"
-	"os"
-	"strings"
-)
-
 type FastCGIConf struct {
 	FastCGI        string
 	FastCGIProto   string
@@ -18,112 +7,24 @@ type FastCGIConf struct {
 	FastCGIRoot    string
 }
 
-var (
-	defaultPort = "80"
-	port        = flag.String("port", "", "Port to run the server.")
-
-	root    = flag.String("root", "", "specify the root.")
-	backend = flag.String("backend", "", "default backend server URL.")
-
-	config map[string]interface{}
-)
-
-func init() {
-	initConf()
-	//initRewrite()
+type HereConf struct {
+	Base  BaseConf   `json:"base" toml:"base" yaml:"base" mapstructure:"base"`
+	Hosts []HostConf `json:"hosts" toml:"hosts" yaml:"hosts" mapstructure:"hosts"`
 }
 
-//func initRewrite() {
-//	rewriteRules := os.Getenv("REWRITE")
-//	if rewriteRules == "" {
-//		return
-//	}
-//	rewrite = make(map[string]string)
-//
-//	rules := strings.Split(rewriteRules, ",")
-//	for _, v := range rules {
-//		if !strings.Contains(v, "=") {
-//			fmt.Println("rewrite rule invalid: " + v)
-//			continue
-//		}
-//
-//		rule := strings.Split(v, "=")
-//		rewrite[rule[0]] = rule[1]
-//	}
-//}
+type BaseConf struct {
+	ListenHost string `json:"listen_host"  toml:"listen_host" yaml:"listen_host" mapstructure:"listen_host"`
+	ListenPort string `json:"listen_port" toml:"listen_port" yaml:"listen_port" mapstructure:"listen_port"`
 
-func initConf() {
-	config = make(map[string]interface{})
+	StaticServer string `json:"static_server" toml:"static_server" yaml:"static_server" mapstructure:"static_server"`
+	StaticRoot   string `json:"static_root" toml:"static_root" yaml:"static_root" mapstructure:"static_root"`
 
-	viper.SetConfigName("httphere") // name of config file (without extension)
-	viper.AddConfigPath(".")        // optionally look for config in the working directory
-	err := viper.ReadInConfig()     // Find and read the config file
-	if err != nil {                 // Handle errors reading the config file
-		fmt.Println("read config from embed data")
-		viper.SetConfigType("toml")
-		viper.ReadConfig(bytes.NewReader(embedConfig))
-	} else {
-		fmt.Println("viper get config file:", viper.ConfigFileUsed())
-	}
-	config = viper.AllSettings()
-
-	for k, v := range config {
-		if strings.Contains(k, "__") {
-			newK := strings.Replace(k, "__", ".", -1)
-			config[newK] = v
-			delete(config, k)
-		}
-	}
-
-	b, _ := json.MarshalIndent(config, "", "  ")
-	fmt.Print(string(b))
+	DumpRequest string `json:"dump_request" toml:"dump_request" yaml:"dump_request" mapstructure:"dump_request"`
 }
 
-func GetRoot() string {
-	if *root != "" {
-		return *root
-	}
-
-	if rootHere := os.Getenv("ROOT"); rootHere != "" {
-		return rootHere
-	}
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		fmt.Printf("Getwd err : %v", err)
-		os.Exit(1)
-	}
-	return pwd
+type HostConf struct {
+	Host        string            `json:"host" toml:"host" yaml:"host" mapstructure:"host"`
+	ReverseType string            `json:"reverse_type" toml:"reverse_type" yaml:"reverse_type" mapstructure:"reverse_type"`
+	Paths       map[string]string `json:"paths" toml:"paths" yaml:"paths" mapstructure:"paths"`
+	Rewrite     map[string]string `json:"rewrite" toml:"rewrite" yaml:"rewrite" mapstructure:"rewrite"`
 }
-
-func GetPort() string {
-	if *port != "" {
-		return *port
-	}
-
-	if ePort := os.Getenv("HERE_PORT"); ePort != "" {
-		return ePort
-	}
-
-	return defaultPort
-}
-
-func GetBackend() string {
-	if *backend != "" {
-		return *backend
-	}
-
-	if eBackend := os.Getenv("HERE_BACKEND"); eBackend != "" {
-		return eBackend
-	}
-
-	return ""
-}
-
-func GetConfig() map[string]interface{} {
-	return config
-}
-
-//func GetRewrite() map[string]string {
-//	return rewrite
-//}
