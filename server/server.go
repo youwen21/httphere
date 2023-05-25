@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -18,10 +19,20 @@ type MyServer struct {
 	domainRevServers map[string]http.Handler
 }
 
+func getHostRewrite(host string) map[string]string {
+	for _, v := range conf.Here.Hosts {
+		if v.Host == host {
+			return v.Rewrite
+		}
+	}
+
+	return nil
+}
+
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// domain servers
 	if v, has := f.domainRevServers[r.Host]; has {
-		v.ServeHTTP(w, r)
+		v.ServeHTTP(w, f.RewriteRequest(r, getHostRewrite(r.Host)))
 		return
 	}
 
@@ -36,7 +47,7 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 转发到默认代理服务器
 	if v, has := f.domainRevServers["default"]; has {
-		v.ServeHTTP(w, r)
+		v.ServeHTTP(w, f.RewriteRequest(r, getHostRewrite("default")))
 		return
 	}
 
@@ -49,6 +60,22 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 	}
 	return
+}
+
+func (f MyServer) RewriteRequest(r *http.Request, reMap map[string]string) *http.Request {
+	if reMap == nil {
+		return r
+	}
+
+	for k, v := range reMap {
+		if strings.HasPrefix(r.URL.Path, k) {
+			path := strings.Replace(r.URL.Path, k, v, 1)
+			r.URL.Path = path
+			return r
+		}
+	}
+
+	return r
 }
 
 func initServerByConf(hostConf conf.HostConf) http.Handler {
