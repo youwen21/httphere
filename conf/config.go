@@ -1,10 +1,9 @@
 package conf
 
 type FastCGIConf struct {
-	FastCGI        string
-	FastCGIProto   string
-	FastCGIAddress string
-	FastCGIRoot    string
+	Proto   string `json:"proto" toml:"proto" yaml:"proto" mapstructure:"proto"`
+	Address string `json:"address" toml:"address" yaml:"address" mapstructure:"address"`
+	Root    string `json:"root" toml:"root" yaml:"root" mapstructure:"root"`
 }
 
 type HereConf struct {
@@ -27,4 +26,6 @@ type HostConf struct {
 	ReverseType string            `json:"reverse_type" toml:"reverse_type" yaml:"reverse_type" mapstructure:"reverse_type"`
 	Paths       map[string]string `json:"paths" toml:"paths" yaml:"paths" mapstructure:"paths"`
 	Rewrite     map[string]string `json:"rewrite" toml:"rewrite" yaml:"rewrite" mapstructure:"rewrite"`
+
+	FastCGI FastCGIConf `json:"fast_cgi" toml:"fast_cgi" yaml:"fast_cgi" mapstructure:"fast_cgi"`
 }

@@ -51,15 +51,18 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func initMuxServerByConf(hostConf conf.HostConf) *http.ServeMux {
+func initServerByConf(hostConf conf.HostConf) http.Handler {
+	if hostConf.ReverseType == "fast_cgi" {
+		return NewFastCGIServer(hostConf.FastCGI.Proto, hostConf.FastCGI.Address, hostConf.FastCGI.Root)
+	}
+
 	server := http.NewServeMux()
 	for k, v := range hostConf.Paths {
 		backendURL, err := url.Parse(v)
 		if err != nil {
-			fmt.Println("config has error:", hostConf)
+			fmt.Println("config parse backend error:", hostConf, v)
 			continue
 		}
-
 		if hostConf.ReverseType == "fake_host" {
 			server.Handle(k, NewSingleHostReverseProxyFake(backendURL))
 		} else {
@@ -83,7 +86,7 @@ func NewMyServer() MyServer {
 	}
 
 	for _, v := range conf.Here.Hosts {
-		s.domainRevServers[v.Host] = initMuxServerByConf(v)
+		s.domainRevServers[v.Host] = initServerByConf(v)
 	}
 
 	// overwrite default reverse server if command backend flag params represent

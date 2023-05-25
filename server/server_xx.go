@@ -64,7 +64,7 @@ package server
 //	return path
 //}
 
-//func initMuxServerByConf(hostConf interface{}) *http.ServeMux {
+//func initServerByConf(hostConf interface{}) *http.ServeMux {
 //	pathsCfg := getPaths(hostConf)
 //	if pathsCfg == nil {
 //		return nil

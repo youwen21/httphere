@@ -185,10 +185,10 @@ var tlsProtocolStrings = map[uint16]string{
 	tls.VersionTLS13: "TLSv1.3",
 }
 
-func NewFastCGIServer(FastCGIProto string, FastCGIAddress string, FastCGIRoot string) FastCGIServer {
+func NewFastCGIServer(proto string, address string, root string) FastCGIServer {
 	var s FastCGIServer
-	s.FastCGIProto = FastCGIProto
-	s.FastCGIAddress = FastCGIAddress
-	s.FastCGIRoot = FastCGIRoot
+	s.FastCGIProto = proto
+	s.FastCGIAddress = address
+	s.FastCGIRoot = root
 	return s
 }

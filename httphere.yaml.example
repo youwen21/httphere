@@ -13,7 +13,8 @@ hosts:
       - "/aa": "http://127.0.0.1:8099/"
     "rewrite":
       - "/aaa": "/bbb"
-  # 指定域名
+
+  # config for specific domain
   - host: "api.com"
     reverse_type: "fake_host"
     paths:
@@ -22,13 +23,10 @@ hosts:
     "rewrite":
       - "/aaa": "/bbb"
 
-  # 指定域名 且 指定路由和重写规则
+  # fastCGI
   - host: "sql.com"
-    reverse_type: "fake_host"
-    paths:
-      "/aa": "http://127.0.0.1:8099/"
-      "/bb": "http://119.91.223.53:8000"
-      "/download": "http://119.91.223.53:8000"
-      "/": "http://119.91.223.53:8098/"
-    "rewrite":
-      "/aaa": "/bbb"
+    reverse_type: "fast_cgi"
+    fast_cgi:
+      proto: "tpc"  # tcp | unix
+      address: "127.0.0.1:9000"  # ip:port | sock file /var/run/php5-fpm.sock
+      root: ""
