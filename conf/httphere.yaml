@@ -1,5 +1,5 @@
 base:
-  #  listen_host: "0.0.0.0"  # default=0.0.0.0
+  #  listen_host: "0.0.0.0"  # default=""
   listen_port: "80"  # default=80
   static_server: "open"  # open | close,  default=open
   static_root: "./" # default=./

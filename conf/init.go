@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	port = flag.String("port", "", "Port to run the server.")
+	host = flag.String("host", "", "host the server listen.")
+	port = flag.String("port", "", "port the server listen.")
 
 	root    = flag.String("root", "", "specify the root.")
 	backend = flag.String("backend", "", "default backend server URL.")
@@ -47,12 +48,12 @@ func initConf() {
 	fmt.Println(string(b))
 }
 
-func GetRoot() string {
-	if *root != "" {
-		return *root
+func GetHost() string {
+	if *host != "" {
+		return *host
 	}
 
-	return Here.Base.StaticRoot
+	return Here.Base.ListenHost
 }
 
 func GetPort() string {
@@ -61,6 +62,14 @@ func GetPort() string {
 	}
 
 	return Here.Base.ListenPort
+}
+
+func GetRoot() string {
+	if *root != "" {
+		return *root
+	}
+
+	return Here.Base.StaticRoot
 }
 
 func GetBackend() string {

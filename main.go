@@ -36,7 +36,7 @@ func main() {
 	port := conf.GetPort()
 	fmt.Printf("port is %s\n", port)
 
-	addr := net.JoinHostPort("", port)
+	addr := net.JoinHostPort(conf.GetHost(), port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Printf("Listen err: %v", err)
