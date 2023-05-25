@@ -34,3 +34,8 @@ hosts:
       proto: "tpc"  # tcp | unix
       address: "127.0.0.1:9000"  # ip:port | sock file /var/run/php5-fpm.sock
       root: "" # project root directory on fastCGI server side
+
+  - host: "127.0.0.1:9999"
+    reverse_type: "fake_host"
+    paths:
+      - "/": "http://127.0.0.1:8099/"

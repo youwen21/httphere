@@ -13,3 +13,24 @@
 
 # 安装
 查看 docs中 quick_start.md
+
+### 使用场景1
+分享当下目录文件供他人下载，或者浏览网页
+```bash
+httphere
+```
+
+
+### 使用场景2
+当下目录为前台文件， 其他请求转发到后台服务  
+接口类请求会转发到127.0.0.1:8080服务。
+```bash
+httphere -backend=127.0.0.1:8080
+```
+
+### 使用场景3
+微服务场景下， 后台有多个服务， 根据httphere.yaml.example在当前目录创建httphere.yaml,  
+配置hosts项， httphere启动时会自动加载当前目录下httphere.yaml配置文件。
+
+
+

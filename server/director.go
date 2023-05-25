@@ -11,7 +11,7 @@ import (
 func NewSingleHostReverseProxyFake(target *url.URL) *httputil.ReverseProxy {
 	targetQuery := target.RawQuery
 	director := func(req *http.Request) {
-		// 便面域名检查阻止访问
+		// 域名检查阻止访问
 		req.Host = target.Host
 		//req.Header.Set("Referer", target.String()) //TODO
 
