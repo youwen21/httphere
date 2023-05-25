@@ -5,6 +5,10 @@ base:
   static_root: "./" # default=./
   dump_request: "yes"
 
+tls:
+  cert_file: ""
+  key_file: ""
+
 hosts:
   - host: "default"
     reverse_type: "default"
@@ -14,7 +18,7 @@ hosts:
     "rewrite":
       - "/aaa": "/bbb"
 
-  # config for specific domain
+  # config for particular domain
   - host: "api.com"
     reverse_type: "fake_host"
     paths:
@@ -29,4 +33,4 @@ hosts:
     fast_cgi:
       proto: "tpc"  # tcp | unix
       address: "127.0.0.1:9000"  # ip:port | sock file /var/run/php5-fpm.sock
-      root: ""
+      root: "" # project root directory on fastCGI server side

@@ -4,3 +4,7 @@ base:
   static_server: "open"  # open | close,  default=open
   static_root: "./" # default=./
   dump_request: "yes"
+
+tls:
+  cert_file: ""
+  key_file: ""

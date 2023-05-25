@@ -8,7 +8,13 @@ type FastCGIConf struct {
 
 type HereConf struct {
 	Base  BaseConf   `json:"base" toml:"base" yaml:"base" mapstructure:"base"`
+	Tls   TlsConf    `json:"tls" toml:"tls" yaml:"tls" mapstructure:"tls"`
 	Hosts []HostConf `json:"hosts" toml:"hosts" yaml:"hosts" mapstructure:"hosts"`
+}
+
+type TlsConf struct {
+	CertFile string `json:"cert_file" toml:"cert_file" yaml:"cert_file" mapstructure:"cert_file"`
+	KeyFile  string `json:"key_file" toml:"key_file" yaml:"key_file" mapstructure:"key_file"`
 }
 
 type BaseConf struct {

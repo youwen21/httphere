@@ -42,7 +42,13 @@ func main() {
 	fmt.Printf("Listening on %s\n", listener.Addr().String())
 
 	httpServer := server.NewMyServer()
-	err = http.Serve(listener, httpServer)
+
+	if conf.Here.Tls.CertFile != "" && conf.Here.Tls.KeyFile != "" {
+		err = http.ServeTLS(listener, httpServer, conf.Here.Tls.CertFile, conf.Here.Tls.KeyFile)
+	} else {
+		err = http.Serve(listener, httpServer)
+	}
+
 	if err != nil {
 		fmt.Printf("server http error:%v\n", err)
 	}
