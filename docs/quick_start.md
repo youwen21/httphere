@@ -1,10 +1,15 @@
 # 安装
 
 ## 使用go安装
-go install gitee.com/youwen21/httphere
+go clone https://github.com/youwen21/httphere.git
+or
+go clone https://gitee.com/apiok/httphere.git
 
-## 下载可执行文件
-> https://gitee.com/youwen21/httphere/releases
+cd httphere
+
+go mod tidy
+go install
+
 
 提供windows, linux, mocOS 三个平台可执行文件。
 
