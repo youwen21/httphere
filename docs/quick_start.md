@@ -1,6 +1,6 @@
-# 安装
+# install
 
-## 编译安装
+## combine install
 ```bash 
 go clone https://github.com/youwen21/httphere.git
 or
@@ -11,9 +11,8 @@ go mod tidy
 go install
 ```
 
-# 启动HTTP服务
-保证 $GOROOT/bin 在path中，在任意目录执行命令  httphere  
-
+# start http server
+set $GOROOT/bin in system PATH variable, then start httphere like below
 ```bash
 httphere
 ```
