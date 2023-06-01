@@ -30,6 +30,7 @@ func initConf() {
 	viper.AddConfigPath(".")    // optionally look for config in the working directory
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
+		fmt.Println("ReadInConfig err: ", err)
 		fmt.Println("read config from embed data")
 		//viper.SetConfigType("yaml")
 		viper.ReadConfig(bytes.NewReader(embedConfig))
