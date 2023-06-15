@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	_ "github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"os"
 )
