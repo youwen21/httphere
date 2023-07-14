@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"httphere/conf"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -41,6 +42,13 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// 输出静态文件
 		if err == nil {
 			f.fileServer.ServeHTTP(w, r)
+			return
+		}
+
+		if conf.Here.Base.HistoryRouters.IsContain(r.URL.Path) {
+			fi, _ := os.Open(filepath.Join(f.root, "index.html"))
+			content, _ := io.ReadAll(fi)
+			w.Write(content)
 			return
 		}
 	}

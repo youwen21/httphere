@@ -1,5 +1,10 @@
 package conf
 
+import (
+	"regexp"
+	"strings"
+)
+
 type FastCGIConf struct {
 	Proto   string `json:"proto" toml:"proto" yaml:"proto" mapstructure:"proto"`
 	Address string `json:"address" toml:"address" yaml:"address" mapstructure:"address"`
@@ -25,6 +30,26 @@ type BaseConf struct {
 	StaticRoot   string `json:"static_root" toml:"static_root" yaml:"static_root" mapstructure:"static_root"`
 
 	DumpRequest string `json:"dump_request" toml:"dump_request" yaml:"dump_request" mapstructure:"dump_request"`
+
+	HistoryRouters historyRouters `json:"history_routers" toml:"history_routers" yaml:"history_routers" mapstructure:"history_routers"`
+}
+
+type historyRouters []string
+
+func (p historyRouters) IsContain(path string) bool {
+	for _, v := range p {
+		if strings.Contains(v, "\\") {
+			ok, err := regexp.MatchString(v, path)
+			if ok && err == nil {
+				return true
+			}
+		} else {
+			if v == path {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 type HostConf struct {
