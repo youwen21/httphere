@@ -45,6 +45,7 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		//TODO 待优化
 		if conf.Here.Base.HistoryRouters.IsContain(r.URL.Path) {
 			fi, _ := os.Open(filepath.Join(f.root, "index.html"))
 			content, _ := io.ReadAll(fi)
