@@ -30,6 +30,33 @@ import (
 	"os"
 )
 
+var (
+	methods = `POST, OPTIONS, GET, PUT, DELETE`
+	headers = `Content-Type,Content-Length,Accept-Encoding,X-CSRF-Token,Authorization,Accept,Origin,Men,Cache-Control,X-Requested-With,Name,DNT,HOST,Pragma,Referer,Duo,Range,user-Agent,token`
+)
+
+func RawCors(next http.Handler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("X-ORIGIN")
+		if origin == "" {
+			origin = r.Header.Get("ORIGIN")
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Expose-Headers", "Access-Control-Allow-Origin")
+		w.Header().Set("Access-Control-Allow-Methods", methods)
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Headers", headers)
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	flag.Parse()
 
@@ -44,9 +71,9 @@ func main() {
 	httpServer := server.NewMyServer()
 
 	if conf.Here.Tls.CertFile != "" && conf.Here.Tls.KeyFile != "" {
-		err = http.ServeTLS(listener, httpServer, conf.Here.Tls.CertFile, conf.Here.Tls.KeyFile)
+		err = http.ServeTLS(listener, RawCors(httpServer), conf.Here.Tls.CertFile, conf.Here.Tls.KeyFile)
 	} else {
-		err = http.Serve(listener, httpServer)
+		err = http.Serve(listener, RawCors(httpServer))
 	}
 
 	if err != nil {
