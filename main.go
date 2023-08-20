@@ -23,6 +23,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/mdp/qrterminal/v3"
 	"httphere/conf"
 	"httphere/server"
 	"net"
@@ -57,8 +58,32 @@ func RawCors(next http.Handler) http.HandlerFunc {
 	})
 }
 
+func printHost() {
+	fmt.Println(fmt.Sprintf("%v%v:%v", "://", "127.0.0.1", conf.GetPort()))
+	fmt.Println(fmt.Sprintf("%v%v:%v", "://", "locahost", conf.GetPort()))
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		panic(err)
+	}
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				viewUrl := fmt.Sprintf("%v%v:%v", "http://", ipnet.IP.String(), conf.GetPort())
+				fmt.Println("查看地址", viewUrl)
+				qrterminal.Generate(viewUrl, qrterminal.L, os.Stdout)
+
+				uploadUrl := fmt.Sprintf("%v%v:%v/httphere_upload", "http://", ipnet.IP.String(), conf.GetPort())
+				fmt.Println("文件上传地址", uploadUrl)
+				qrterminal.Generate(uploadUrl, qrterminal.L, os.Stdout)
+			}
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
+
+	printHost()
 
 	addr := net.JoinHostPort(conf.GetHost(), conf.GetPort())
 	listener, err := net.Listen("tcp", addr)
