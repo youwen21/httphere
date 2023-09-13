@@ -181,7 +181,7 @@ func NewMyServer() MyServer {
 		root := conf.GetRoot()
 		fmt.Printf("root is %s\n", root)
 		s.root = root
-		s.fileServer = http.FileServer(http.Dir(root))
+		s.fileServer = OptFileServer(http.FileServer(http.Dir(root)), root)
 	}
 
 	for _, v := range conf.Here.Hosts {
