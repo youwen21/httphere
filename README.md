@@ -1,18 +1,22 @@
 
 # Httphere
-a static file server, 
-if file not exists, the request will handle by ReverseProxy.  
-you can config the ReverseProxy backend url.
+一个开发者工具。  
+支持：
+ - 浏览文件
+ - 局域网内上传，下载文件
+ - 静态网站服务器
+ - 反向代理 - 不存在的请求，作为代理服务器转发到后端
+ - php服务器，fast-cgi支持php脚本
 
-# install
+# 安装
 see docs/quick_start.md
 
-# start server
+# 启动http服务
 ```bash
 httphere
 ```
 support command params
-- host
+- host 
 - port 
 - backend
 
