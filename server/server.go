@@ -111,16 +111,16 @@ func initServerByConf(hostConf conf.HostConf) http.Handler {
 	}
 
 	server := http.NewServeMux()
-	for k, v := range hostConf.Paths {
-		backendURL, err := url.Parse(v)
+	for cfPath, cfTarget := range hostConf.Paths {
+		backendURL, err := url.Parse(cfTarget)
 		if err != nil {
-			fmt.Println("config parse backend error:", hostConf, v)
+			fmt.Println("config parse backend error:", hostConf, cfTarget)
 			continue
 		}
 		if hostConf.ReverseType == "fake_host" {
-			server.Handle(k, NewSingleHostReverseProxyFake(backendURL))
+			server.Handle(cfPath, NewSingleHostReverseProxyFake(backendURL))
 		} else {
-			server.Handle(k, httputil.NewSingleHostReverseProxy(backendURL))
+			server.Handle(cfPath, httputil.NewSingleHostReverseProxy(backendURL))
 		}
 	}
 
