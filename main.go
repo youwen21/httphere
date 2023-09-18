@@ -84,23 +84,29 @@ func main() {
 
 	printHost()
 
-	addr := net.JoinHostPort(conf.GetHost(), conf.GetPort())
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		fmt.Printf("Listen err: %v", err)
-		os.Exit(2)
-	}
-	fmt.Printf("Listening on %s\n", listener.Addr().String())
-
 	httpServer := server.NewMyServer()
 
 	if conf.Here.Tls.CertFile != "" && conf.Here.Tls.KeyFile != "" {
+		addr := net.JoinHostPort(conf.GetHost(), "443")
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			fmt.Printf("Listen err: %v", err)
+			os.Exit(2)
+		}
+		fmt.Printf("Listening on %s\n", listener.Addr().String())
 		err = http.ServeTLS(listener, RawCors(httpServer), conf.Here.Tls.CertFile, conf.Here.Tls.KeyFile)
 	} else {
+		addr := net.JoinHostPort(conf.GetHost(), conf.GetPort())
+		listener, err := net.Listen("tcp", addr)
+		if err != nil {
+			fmt.Printf("Listen err: %v", err)
+			os.Exit(2)
+		}
+		fmt.Printf("Listening on %s\n", listener.Addr().String())
 		err = http.Serve(listener, RawCors(httpServer))
 	}
 
-	if err != nil {
-		fmt.Printf("server http error:%v\n", err)
-	}
+	//if err != nil {
+	//	fmt.Printf("server http error:%v\n", err)
+	//}
 }
