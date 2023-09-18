@@ -23,7 +23,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/mdp/qrterminal/v3"
 	"httphere/conf"
 	"httphere/server"
 	"net"
@@ -70,11 +69,11 @@ func printHost() {
 			if ipnet.IP.To4() != nil {
 				viewUrl := fmt.Sprintf("%v%v:%v", "http://", ipnet.IP.String(), conf.GetPort())
 				fmt.Println("查看地址", viewUrl)
-				qrterminal.Generate(viewUrl, qrterminal.L, os.Stdout)
+				//qrterminal.Generate(viewUrl, qrterminal.L, os.Stdout)
 
 				uploadUrl := fmt.Sprintf("%v%v:%v/httphere_upload", "http://", ipnet.IP.String(), conf.GetPort())
 				fmt.Println("文件上传地址", uploadUrl)
-				qrterminal.Generate(uploadUrl, qrterminal.L, os.Stdout)
+				//qrterminal.Generate(uploadUrl, qrterminal.L, os.Stdout)
 			}
 		}
 	}

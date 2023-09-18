@@ -1,16 +1,14 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
-	"httphere/asset"
 	"httphere/conf"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,6 +18,7 @@ type MyServer struct {
 	root string
 
 	fileServer       http.Handler
+	HistoryRouters   conf.HistoryRouters
 	domainRevServers map[string]http.Handler
 }
 
@@ -33,61 +32,6 @@ func getHostRewrite(host string) map[string]string {
 	return nil
 }
 
-func (f MyServer) ServeUpload(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		fi, _ := asset.Dist.Open("dist/upload.html")
-		content, _ := io.ReadAll(fi)
-		w.Write(content)
-		return
-	} else {
-		// Multipart form
-		err := r.ParseMultipartForm(32 << 20) // maxMemory 32MB
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			return
-		}
-		multipartForm := r.MultipartForm
-		if multipartForm == nil {
-			w.Write([]byte("未找到上传的文件"))
-			return
-		}
-
-		files := multipartForm.File["file"]
-		fmt.Println(files)
-		for _, file := range files {
-			dst := path.Join(conf.GetRoot(), file.Filename)
-
-			// Upload the file to specific dst.
-			err := SaveUploadedFile(file, dst)
-			if err != nil {
-				fmt.Println("add chapter SaveUploadedFile error: ", err)
-				continue
-			}
-		}
-
-		msg := fmt.Sprintf("上传完成, 共上传 %v个文件", len(files))
-		w.Write([]byte(msg))
-		return
-	}
-}
-
-func SaveUploadedFile(file *multipart.FileHeader, dst string) error {
-	src, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, src)
-	return err
-}
-
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// domain servers
 	if v, has := f.domainRevServers[r.Host]; has {
@@ -96,20 +40,18 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Path == "/httphere_upload" {
-		f.ServeUpload(w, r)
+		ServeUpload(w, r)
 		return
 	}
 
 	if f.fileServer != nil {
-		_, err := os.Stat(filepath.Join(f.root, r.URL.Path))
 		// 输出静态文件
-		if err == nil {
+		if _, err := os.Stat(filepath.Join(f.root, r.URL.Path)); err == nil {
 			f.fileServer.ServeHTTP(w, r)
 			return
 		}
 
-		//TODO 待优化
-		if conf.Here.Base.HistoryRouters.IsContain(r.URL.Path) {
+		if f.HistoryRouters.IsContain(r.URL.Path) {
 			fi, _ := os.Open(filepath.Join(f.root, "index.html"))
 			content, _ := io.ReadAll(fi)
 			w.Write(content)
@@ -141,13 +83,36 @@ func (f MyServer) RewriteRequest(r *http.Request, reMap map[string]string) *http
 
 	for k, v := range reMap {
 		if strings.HasPrefix(r.URL.Path, k) {
-			path := strings.Replace(r.URL.Path, k, v, 1)
-			r.URL.Path = path
+			r.URL.Path = strings.Replace(r.URL.Path, k, v, 1)
 			return r
 		}
 	}
 
 	return r
+}
+
+func (f MyServer) initHistoryRouters(routerFile string) error {
+	file, err := os.Open(routerFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	r := bufio.NewReader(file)
+	for {
+		// ReadLine is a low-level line-reading primitive.
+		// Most callers should use ReadBytes('\n') or ReadString('\n') instead or use a Scanner.
+		bytes, _, err := r.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		f.HistoryRouters = append(f.HistoryRouters, string(bytes))
+	}
+
+	return nil
 }
 
 func initServerByConf(hostConf conf.HostConf) http.Handler {
@@ -182,22 +147,23 @@ func NewMyServer() MyServer {
 		fmt.Printf("root is %s\n", root)
 		s.root = root
 		s.fileServer = OptFileServer(http.FileServer(http.Dir(root)), root)
+		// init HistoryRouters
+		if _, err := os.Stat(filepath.Join(root, "httphere_routers.txt")); err == nil {
+			s.HistoryRouters = make(conf.HistoryRouters, 0)
+			err = s.initHistoryRouters(filepath.Join(root, "httphere_routers.txt"))
+			if err != nil {
+				fmt.Println("initHistoryRouters err:", err)
+			}
+		}
 	}
 
 	for _, v := range conf.Here.Hosts {
 		s.domainRevServers[v.Host] = initServerByConf(v)
 	}
 
-	// overwrite default reverse server if command backend flag params represent
-	backend := conf.GetBackend()
-	if backend != "" {
-		backendURL, err := url.Parse(backend)
-		if err == nil {
-			s.domainRevServers["default"] = httputil.NewSingleHostReverseProxy(backendURL)
-		} else {
-			fmt.Println("backend parse error:", backend, err)
-		}
-	}
-
 	return s
+}
+
+func initHistoryRouters() {
+
 }

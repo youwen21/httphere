@@ -13,8 +13,7 @@ var (
 	host = flag.String("host", "", "host the server listen.")
 	port = flag.String("port", "", "port the server listen.")
 
-	root    = flag.String("root", "", "specify the root.")
-	backend = flag.String("backend", "", "default backend server URL.")
+	root = flag.String("root", "", "specify the root.")
 
 	Here HereConf
 )
@@ -70,12 +69,4 @@ func GetRoot() string {
 	}
 
 	return Here.Base.StaticRoot
-}
-
-func GetBackend() string {
-	if *backend != "" {
-		return *backend
-	}
-
-	return ""
 }

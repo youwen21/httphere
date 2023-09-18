@@ -30,13 +30,11 @@ type BaseConf struct {
 	StaticRoot   string `json:"static_root" toml:"static_root" yaml:"static_root" mapstructure:"static_root"`
 
 	DumpRequest string `json:"dump_request" toml:"dump_request" yaml:"dump_request" mapstructure:"dump_request"`
-
-	HistoryRouters historyRouters `json:"history_routers" toml:"history_routers" yaml:"history_routers" mapstructure:"history_routers"`
 }
 
-type historyRouters []string
+type HistoryRouters []string
 
-func (p historyRouters) IsContain(path string) bool {
+func (p HistoryRouters) IsContain(path string) bool {
 	for _, v := range p {
 		if strings.Contains(v, "\\") {
 			ok, err := regexp.MatchString(v, path)
