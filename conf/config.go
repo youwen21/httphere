@@ -58,3 +58,13 @@ type HostConf struct {
 
 	FastCGI FastCGIConf `json:"fast_cgi" toml:"fast_cgi" yaml:"fast_cgi" mapstructure:"fast_cgi"`
 }
+
+func (hc *HereConf) GetHostRewrite(host string) map[string]string {
+	for _, v := range Here.Hosts {
+		if v.Host == host {
+			return v.Rewrite
+		}
+	}
+
+	return nil
+}

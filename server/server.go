@@ -22,20 +22,10 @@ type MyServer struct {
 	domainRevServers map[string]http.Handler
 }
 
-func getHostRewrite(host string) map[string]string {
-	for _, v := range conf.Here.Hosts {
-		if v.Host == host {
-			return v.Rewrite
-		}
-	}
-
-	return nil
-}
-
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// domain servers
 	if v, has := f.domainRevServers[r.Host]; has {
-		v.ServeHTTP(w, f.RewriteRequest(r, getHostRewrite(r.Host)))
+		v.ServeHTTP(w, f.RewriteRequest(r, conf.Here.GetHostRewrite(r.Host)))
 		return
 	}
 
@@ -61,7 +51,7 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 转发到默认代理服务器
 	if v, has := f.domainRevServers["default"]; has {
-		v.ServeHTTP(w, f.RewriteRequest(r, getHostRewrite("default")))
+		v.ServeHTTP(w, f.RewriteRequest(r, conf.Here.GetHostRewrite("default")))
 		return
 	}
 
