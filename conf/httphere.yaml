@@ -1,0 +1,13 @@
+base:
+  #  listen_host: "0.0.0.0"  # default=""
+  listen_port: "80"  # default=80
+  dump_request: "yes"
+  static_server: "open"  # open | close,  default=open
+  static_root: "./" # default=./
+  history_routers: # vue history routers
+    - aaa
+    - bbbb
+
+tls:
+  cert_file: ""
+  key_file: ""
