@@ -1,0 +1,44 @@
+base:
+  #  listen_host: "0.0.0.0"  # default=0.0.0.0
+  listen_port: "80"  # default=80
+  static_server: "open"  # open | close,  default=open
+  static_root: "./" # default=./
+  dump_request: "yes"
+  history_routers: # vue history routers
+    - aaa
+    - bbbb
+
+tls:
+  cert_file: ""
+  key_file: ""
+
+hosts:
+  - host: "default"
+    reverse_type: "default"
+    paths:
+      - "/": "http://127.0.0.1:8099/"
+      - "/aa": "http://127.0.0.1:8099/"
+    "rewrite":
+      - "/aaa": "/bbb"
+
+  # config for particular domain
+  - host: "api.com"
+    reverse_type: "fake_host"
+    paths:
+      - "/": "http://127.0.0.1:8099/"
+      - "/aa": "http://127.0.0.1:8099/"
+    "rewrite":
+      - "/aaa": "/bbb"
+
+  # fastCGI
+  - host: "sql.com"
+    reverse_type: "fast_cgi"
+    fast_cgi:
+      proto: "tpc"  # tcp | unix
+      address: "127.0.0.1:9000"  # ip:port | sock file /var/run/php5-fpm.sock
+      root: "" # project root directory on fastCGI server side
+
+  - host: "127.0.0.1"
+    reverse_type: "fake_host"
+    paths:
+      - "/": "http://127.0.0.1:8099/"

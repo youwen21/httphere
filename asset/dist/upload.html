@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>文件上传</title>
+    <style type="text/css">
+        body {
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .wrapper {
+            display: flex;
+            height: 100%;
+
+            margin: 5px;
+        }
+
+        main {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        aside {
+            flex: 0 0 20%;
+            background-color: red;
+            overflow: scroll;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <aside>
+
+    </aside>
+    <main>
+        <div class="wrapper_inner">
+            <form action="/httphere_upload" method="post" enctype="multipart/form-data">
+                <input id="file-uploader" type="file" name="file" multiple="multiple"> <br/>
+                <br/>
+                <button type="submit">上传</button>
+            </form>
+            <br/>
+            <div id="upload_names">
+
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+<script>
+    let tr_tmpl = `
+		<p>{name}</p>
+	`
+
+    function template(str, data) {
+        var pattern = /{\s*([a-zA-Z_]+)\s*}/;
+        var result = null;
+        while (result = pattern.exec(str)) {
+            str = str.replace(result[0], data[result[1]])
+        }
+        return str;
+    }
+
+    const fileUploader = document.getElementById('file-uploader');
+    // change 事件，读取元数据
+    fileUploader.addEventListener('change', (event) => {
+        // 获取文件列表数组
+        files = event.target.files;
+        // 清空body内容
+        document.getElementById('upload_names').innerHTML = ""
+
+        // 生成新body内容
+        let NewHtml = ""
+
+        // 遍历并获取元数据
+        for(let i = 0; i < files.length; i++){
+            // for (const file of files) {
+            let file = files[i]
+            const name = file.name;
+            const type = file.type ? file.type: 'NA';
+            const size = file.size;
+            const lastModified = file.lastModified;
+            console.log({ file, name, type, size, lastModified });
+
+            NewHtml += template(tr_tmpl, {"name":file.name, "id": i})
+        }
+
+        // body 刷新内容
+        document.getElementById('upload_names').innerHTML = NewHtml
+    });
+
+</script>
+</html>
