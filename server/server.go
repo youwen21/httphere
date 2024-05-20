@@ -87,10 +87,6 @@ func (f MyServer) RewriteRequest(r *http.Request, reMap map[string]string) *http
 }
 
 func initServerByConf(hostConf conf.HostCfg) http.Handler {
-	if hostConf.ReverseType == "fast_cgi" {
-		return NewFastCGIServer(hostConf.FastCGI.Proto, hostConf.FastCGI.Address, hostConf.FastCGI.Root)
-	}
-
 	server := http.NewServeMux()
 	for cfPath, cfTarget := range hostConf.Paths {
 		backendURL, err := url.Parse(cfTarget)
