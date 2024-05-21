@@ -68,11 +68,11 @@ func printHost() {
 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
 				viewUrl := fmt.Sprintf("%v%v:%v", "http://", ipnet.IP.String(), conf.GetPort())
-				fmt.Println("upload file url:", viewUrl)
+				fmt.Println("view url:", viewUrl)
 				//qrterminal.Generate(viewUrl, qrterminal.L, os.Stdout)
 
 				uploadUrl := fmt.Sprintf("%v%v:%v/httphere_upload", "http://", ipnet.IP.String(), conf.GetPort())
-				fmt.Println("upload file url:", uploadUrl)
+				fmt.Println("upload url:", uploadUrl)
 				//qrterminal.Generate(uploadUrl, qrterminal.L, os.Stdout)
 
 				qrUrl := fmt.Sprintf("%v%v:%v/qr", "http://", ipnet.IP.String(), conf.GetPort())
