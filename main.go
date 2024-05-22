@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"httphere/conf"
 	"httphere/server"
+	"httphere/utils"
 	"net"
 	"net/http"
 	"os"
@@ -58,28 +59,12 @@ func RawCors(next http.Handler) http.HandlerFunc {
 }
 
 func printHost() {
-	fmt.Println(fmt.Sprintf("%v%v:%v", "://", "127.0.0.1", conf.GetPort()))
-	fmt.Println(fmt.Sprintf("%v%v:%v", "://", "locahost", conf.GetPort()))
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		panic(err)
-	}
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				viewUrl := fmt.Sprintf("%v%v:%v", "http://", ipnet.IP.String(), conf.GetPort())
-				fmt.Println("view url:", viewUrl)
-				//qrterminal.Generate(viewUrl, qrterminal.L, os.Stdout)
+	fmt.Println(fmt.Sprintf("%v%v:%v", "http://", "locahost", conf.GetPort()))
 
-				uploadUrl := fmt.Sprintf("%v%v:%v/httphere_upload", "http://", ipnet.IP.String(), conf.GetPort())
-				fmt.Println("upload url:", uploadUrl)
-				//qrterminal.Generate(uploadUrl, qrterminal.L, os.Stdout)
-
-				qrUrl := fmt.Sprintf("%v%v:%v/qr", "http://", ipnet.IP.String(), conf.GetPort())
-				fmt.Println("qr url:", qrUrl)
-			}
-		}
-	}
+	viewUrl, uploadUrl, qrUrl := utils.GetUrls()
+	fmt.Println("view url:", viewUrl)
+	fmt.Println("upload url:", uploadUrl)
+	fmt.Println("qr url:", qrUrl)
 }
 
 func main() {
@@ -95,7 +80,6 @@ func main() {
 		fmt.Printf("Listen err: %v", err)
 		os.Exit(2)
 	}
-	fmt.Printf("Listening on %s\n", listener.Addr().String())
 
 	if conf.Here.Tls.CertFile != "" && conf.Here.Tls.KeyFile != "" {
 		err = http.ServeTLS(listener, RawCors(httpServer), conf.Here.Tls.CertFile, conf.Here.Tls.KeyFile)

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bufio"
 	"fmt"
 	"httphere/conf"
 	"io"
@@ -23,7 +22,7 @@ type MyServer struct {
 }
 
 func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// domain servers
+	// domain reverse servers
 	if v, has := f.domainRevServers[r.Host]; has {
 		v.ServeHTTP(w, f.RewriteRequest(r, conf.Here.GetHostRewrite(r.Host)))
 		return
@@ -61,7 +60,7 @@ func (f MyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if conf.Here.Base.DumpRequest == "yes" {
-		// 没有代理服务器，打印日志
+		// dump request
 		b, _ := httputil.DumpRequest(r, true)
 		fmt.Println(time.Now().Format(time.RFC3339))
 		fmt.Println(string(b))
@@ -111,20 +110,11 @@ func NewMyServer() MyServer {
 	// static server
 	if conf.Here.Base.StaticServer == "open" {
 		root := conf.GetRoot()
-		fmt.Printf("root is %s\n", root)
+		absRoot, _ := filepath.Abs(root)
+		fmt.Printf("root is %s\n", absRoot)
 		s.root = root
-		//s.fileServer = OptFileServer(http.FileServer(http.Dir(root)), root)
 		s.fileServer = http.FileServer(http.Dir(root))
-		// init VueHistoryRouters
 		s.HistoryRouters = conf.Here.Base.HistoryRouters
-		//if _, err := os.Stat(filepath.Join(root, "httphere_routers.txt")); err == nil {
-		//	hsRouters, err := initHistoryRouters(filepath.Join(root, "httphere_routers.txt"))
-		//	if err != nil {
-		//		fmt.Println("initHistoryRouters err:", err)
-		//	} else {
-		//		s.HistoryRouters = hsRouters
-		//	}
-		//}
 	}
 
 	for _, v := range conf.Here.Hosts {
@@ -132,29 +122,4 @@ func NewMyServer() MyServer {
 	}
 
 	return s
-}
-
-func initHistoryRouters(routerFile string) (conf.VueHistoryRouters, error) {
-	hsRouters := make(conf.VueHistoryRouters, 0)
-	file, err := os.Open(routerFile)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	r := bufio.NewReader(file)
-	for {
-		// ReadLine is a low-level line-reading primitive.
-		// Most callers should use ReadBytes('\n') or ReadString('\n') instead or use a Scanner.
-		bytes, _, err := r.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		hsRouters = append(hsRouters, string(bytes))
-	}
-
-	return hsRouters, nil
 }
