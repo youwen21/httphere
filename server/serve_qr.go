@@ -2,8 +2,8 @@ package server
 
 import (
 	"bytes"
-	"httphere/asset"
-	"httphere/utils"
+	"github.com/youwen21/httphere/asset"
+	"github.com/youwen21/httphere/utils"
 	"io"
 	"net/http"
 )

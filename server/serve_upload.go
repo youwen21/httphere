@@ -2,8 +2,8 @@ package server
 
 import (
 	"fmt"
-	"httphere/asset"
-	"httphere/conf"
+	"github.com/youwen21/httphere/asset"
+	"github.com/youwen21/httphere/conf"
 	"io"
 	"mime/multipart"
 	"net/http"

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"httphere/conf"
+	"github.com/youwen21/httphere/conf"
 	"net"
 )
 

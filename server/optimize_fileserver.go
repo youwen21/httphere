@@ -1,7 +1,7 @@
 package server
 
 import (
-	"httphere/asset"
+	"github.com/youwen21/httphere/asset"
 	"io"
 	"net/http"
 	"strings"
